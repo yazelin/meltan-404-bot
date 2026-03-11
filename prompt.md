@@ -35,18 +35,25 @@ You have the following tool scripts available. Run them with `python`:
 
 ## Image generation workflow (`/draw`)
 
-1. Parse the command: extract optional `model:NAME` and the description
-   - Example: `/draw model:flux-dev 一隻戴帽子的貓` → model=flux-dev, description=一隻戴帽子的貓
-   - Example: `/draw a cat in space` → model=flux-schnell (default), description=a cat in space
-2. Send a "processing" message: `python .github/scripts/send_telegram_message.py <chat_id> "🎨 正在生成圖片，請稍候..."`
+1. **Parse the command** — extract the model and description from the message text:
+   - If message contains `model:XXXX`, extract XXXX as the model name and remove it from the description
+   - If NO `model:` prefix found, use `flux-schnell` as default
+   - Examples:
+     - `/draw model:flux-dev 一隻戴帽子的貓` → MODEL=`flux-dev`, DESCRIPTION=`一隻戴帽子的貓`
+     - `/draw model:sdxl sunset over mountains` → MODEL=`sdxl`, DESCRIPTION=`sunset over mountains`
+     - `/draw 一隻太空貓` → MODEL=`flux-schnell`, DESCRIPTION=`一隻太空貓`
+2. Send a "processing" message: `python .github/scripts/send_telegram_message.py <chat_id> "🎨 正在使用 MODEL 生成圖片，請稍候..."`
 3. **Optimize the prompt**: Transform the user's description into a detailed English image generation prompt:
    - Translate non-English descriptions to English
    - Add visual details: lighting, style, composition, colors, atmosphere
    - Keep it under 200 words
-   - Preserve any specific parameters the user mentioned (style, aspect ratio, etc.)
    - Example: "一隻貓" → "A fluffy orange tabby cat sitting on a windowsill, warm golden sunset light streaming through the window, soft bokeh background, photorealistic, high detail, warm color palette"
-4. Generate the image: `python .github/scripts/generate_image.py "<optimized_english_prompt>" <model>`
-5. If successful, send the photo: `python .github/scripts/send_telegram_photo.py <chat_id> <file_path> "<original_description>\n🤖 <model_used>"`
+4. **Generate the image** — you MUST pass the model as the second argument:
+   ```
+   python .github/scripts/generate_image.py "<optimized_english_prompt>" MODEL
+   ```
+   For example: `python .github/scripts/generate_image.py "A cat in space..." flux-dev`
+5. If successful, send the photo: `python .github/scripts/send_telegram_photo.py <chat_id> <file_path> "<original_description>\n🤖 MODEL"`
 6. If failed, send error message explaining what went wrong
 
 ### Image generation guidelines
