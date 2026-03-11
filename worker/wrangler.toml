@@ -1,0 +1,11 @@
+name = "meltan-404-relay"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ALLOWED_USERS = "850654509"
+ALLOWED_CHATS = ""
+
+[[kv_namespaces]]
+binding = "BOT_MEMORY"
+id = "PLACEHOLDER_KV_ID"
