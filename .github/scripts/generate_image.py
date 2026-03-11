@@ -64,7 +64,7 @@ def generate_with_model(token, model_id, prompt, output_dir):
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
-            "Accept": "image/*",
+            "Accept": "image/png",
         },
         method="POST",
     )
