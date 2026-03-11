@@ -36,13 +36,15 @@ def main():
         print(json.dumps({"ok": False, "error": "Download timed out (240s)"}))
         sys.exit(1)
     if result.returncode != 0:
-        err_msg = result.stderr.strip()[-500:] if result.stderr else "Unknown error"
-        # Detect YouTube cookie issue and give helpful message
-        if "Sign in to confirm" in err_msg or "cookies" in err_msg.lower():
+        raw_err = result.stderr.strip()[-500:] if result.stderr else "Unknown error"
+        # Detect YouTube sign-in requirement
+        if "Sign in to confirm" in raw_err:
             if not yt_cookies:
-                err_msg = "YouTube 需要 cookies 驗證。請設定 YT_COOKIES secret，或嘗試其他平台的影片連結"
+                err_msg = "YouTube 需要登入驗證。請執行 bash update-cookies.sh 設定 cookies，或嘗試其他平台"
             else:
-                err_msg = "YouTube cookies 已過期，請重新匯出並更新 YT_COOKIES secret"
+                err_msg = f"YouTube cookies 無法通過驗證（可能 IP 不同或已過期）。請重新執行 bash update-cookies.sh\n原始錯誤: {raw_err[-200:]}"
+        else:
+            err_msg = raw_err
         print(json.dumps({"ok": False, "error": err_msg}))
         sys.exit(1)
     try:
