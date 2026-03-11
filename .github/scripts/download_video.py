@@ -25,7 +25,13 @@ def main():
            "-f", "b",
            "-o", output_template,
            "--no-playlist", "--no-overwrites",
-           "--restrict-filenames", "--print-json"]
+           "--restrict-filenames", "--print-json",
+           "--extractor-args", "youtubetab:skip=webpage",
+           "--extractor-args", "youtube:player_skip=webpage,configs"]
+    # Use visitor_data if provided (helps avoid bot detection)
+    yt_visitor_data = os.environ.get("YT_VISITOR_DATA", "")
+    if yt_visitor_data:
+        cmd[-1] = f"youtube:player_skip=webpage,configs;visitor_data={yt_visitor_data}"
     if cookies_file:
         cmd.extend(["--cookies", cookies_file])
     cmd.append(url)

@@ -55,6 +55,17 @@ case "$TEXT" in
     URL="${TEXT#/download }"
     URL="${URL#"${URL%%[![:space:]]*}"}"
 
+    # YouTube URLs → direct to Copilot CLI (YouTube requires login on runner IPs)
+    # Match: youtube.com, youtu.be, yout-ube.com, m.youtube.com, etc.
+    if echo "$URL" | grep -qiE "youtu\.?be|yout.*ube"; then
+      send_msg "$CHAT_ID" "🔍 YouTube 影片無法直接下載，正在搜尋替代來源..." || true
+      echo "DOWNLOAD_FAILED_URL=$URL" >> "${GITHUB_ENV:-/dev/null}"
+      set_output true
+      exit 0
+    fi
+
+    # Non-YouTube URLs → download directly with yt-dlp
+    send_msg "$CHAT_ID" "⏳ 正在下載影片..." || true
     RESULT=$(download_video "$URL") || true
     OK=$(printf '%s' "$RESULT" | json_field ok False || echo "False")
 
