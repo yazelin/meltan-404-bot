@@ -41,6 +41,10 @@ def main():
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     resp = urllib.request.urlopen(req)
     data = json.loads(resp.read())
+    # Debug: print callback env status
+    cb_url = os.environ.get("CALLBACK_URL", "")
+    cb_token = os.environ.get("CALLBACK_TOKEN", "")
+    print(f"[DEBUG] CALLBACK_URL={'SET' if cb_url else 'EMPTY'} CALLBACK_TOKEN={'SET' if cb_token else 'EMPTY'}")
     post_callback(chat_id, text)
     print(json.dumps({"ok": True, "message_id": data.get("result", {}).get("message_id")}))
 
