@@ -115,10 +115,11 @@ function renderChat(history) {
     const bubbleCls = isUser ? 'bubble--user' : 'bubble--bot';
     const cmdCls = isCommand ? ' bubble--command' : '';
     const time = msg.timestamp || '';
+    const htmlText = escapeHtml(text).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
     return `
       <div class="bubble-row ${rowCls}">
         <div>
-          <div class="bubble ${bubbleCls}${cmdCls}">${escapeHtml(text)}</div>
+          <div class="bubble ${bubbleCls}${cmdCls}">${htmlText}</div>
           ${time ? `<div class="bubble-time">${formatTime(time)}</div>` : ''}
         </div>
       </div>`;
