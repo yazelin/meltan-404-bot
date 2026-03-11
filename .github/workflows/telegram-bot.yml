@@ -119,5 +119,31 @@ jobs:
           # Write callback config to file (Copilot CLI may not pass env vars to subprocesses)
           echo "{\"url\":\"${CALLBACK_URL}\",\"token\":\"${CALLBACK_TOKEN}\"}" > /tmp/.callback_config
 
+          # Debug: verify callback token works
+          python3 -c "
+          import json, urllib.request
+          with open('/tmp/.callback_config') as f:
+              cfg = json.load(f)
+          token = cfg['token']
+          print(f'[VERIFY] token_len={len(token)} token_repr={repr(token[:10])}...{repr(token[-10:])}')
+          payload = json.dumps({'type':'bot_reply','chat_id':'${INPUT_CHAT_ID}','text':'[callback-verify]','timestamp':'2026-01-01T00:00:00Z'}).encode()
+          req = urllib.request.Request(cfg['url'], data=payload, headers={'Content-Type':'application/json','X-Secret':token})
+          try:
+              resp = urllib.request.urlopen(req, timeout=5)
+              print(f'[VERIFY] SUCCESS: {resp.read().decode()}')
+          except Exception as e:
+              print(f'[VERIFY] FAILED: {e}')
+              # Try without any whitespace
+              token2 = token.strip()
+              if token2 != token:
+                  print(f'[VERIFY] token had whitespace! stripped len={len(token2)}')
+                  req2 = urllib.request.Request(cfg['url'], data=payload, headers={'Content-Type':'application/json','X-Secret':token2})
+                  try:
+                      resp2 = urllib.request.urlopen(req2, timeout=5)
+                      print(f'[VERIFY] STRIPPED SUCCESS: {resp2.read().decode()}')
+                  except Exception as e2:
+                      print(f'[VERIFY] STRIPPED ALSO FAILED: {e2}')
+          "
+
           PROMPT=$(printf "%s%b" "$PROMPT" "$CONTEXT")
           copilot --model gpt-5-mini --autopilot --yolo --max-autopilot-continues 10 -p "$PROMPT"
