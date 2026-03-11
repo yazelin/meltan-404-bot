@@ -116,5 +116,8 @@ jobs:
           # Current message
           CONTEXT="${CONTEXT}\n\n## Current Message (process THIS message)\n\n- **Chat ID**: ${INPUT_CHAT_ID}\n- **Username**: ${INPUT_USERNAME}\n- **Message**: ${INPUT_TEXT}"
 
+          # Write callback config to file (Copilot CLI may not pass env vars to subprocesses)
+          echo "{\"url\":\"${CALLBACK_URL}\",\"token\":\"${CALLBACK_TOKEN}\"}" > /tmp/.callback_config
+
           PROMPT=$(printf "%s%b" "$PROMPT" "$CONTEXT")
           copilot --model gpt-5-mini --autopilot --yolo --max-autopilot-continues 10 -p "$PROMPT"

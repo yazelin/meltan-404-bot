@@ -6,9 +6,24 @@ Env: TELEGRAM_BOT_TOKEN, CALLBACK_URL (optional), CALLBACK_TOKEN (optional)
 import json, os, sys, urllib.request
 from datetime import datetime, timezone
 
+def _load_callback_config():
+    """Load callback config from env vars, falling back to config file."""
+    url = os.environ.get("CALLBACK_URL", "")
+    token = os.environ.get("CALLBACK_TOKEN", "")
+    if url and token:
+        return url, token
+    # Fallback: read from file (Copilot CLI may not pass env vars)
+    try:
+        import json as _json
+        with open("/tmp/.callback_config") as f:
+            cfg = _json.load(f)
+            return cfg.get("url", ""), cfg.get("token", "")
+    except Exception:
+        pass
+    return "", ""
+
 def post_callback(chat_id, text):
-    callback_url = os.environ.get("CALLBACK_URL", "")
-    callback_token = os.environ.get("CALLBACK_TOKEN", "")
+    callback_url, callback_token = _load_callback_config()
     if not callback_url or not callback_token:
         return
     payload = json.dumps({
@@ -41,10 +56,6 @@ def main():
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     resp = urllib.request.urlopen(req)
     data = json.loads(resp.read())
-    # Debug: print callback env status
-    cb_url = os.environ.get("CALLBACK_URL", "")
-    cb_token = os.environ.get("CALLBACK_TOKEN", "")
-    print(f"[DEBUG] CALLBACK_URL={'SET' if cb_url else 'EMPTY'} CALLBACK_TOKEN={'SET' if cb_token else 'EMPTY'}")
     post_callback(chat_id, text)
     print(json.dumps({"ok": True, "message_id": data.get("result", {}).get("message_id")}))
 
