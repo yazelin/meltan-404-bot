@@ -35,7 +35,7 @@ def post_callback(chat_id, text):
     req = urllib.request.Request(
         callback_url,
         data=payload,
-        headers={"Content-Type": "application/json", "X-Secret": callback_token},
+        headers={"Content-Type": "application/json", "X-Secret": callback_token, "User-Agent": "meltan-404-bot/1.0"},
     )
     try:
         urllib.request.urlopen(req, timeout=5).read()

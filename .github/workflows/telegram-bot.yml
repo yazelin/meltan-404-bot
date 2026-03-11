@@ -128,7 +128,7 @@ jobs:
           url = cfg['url']
           print(f'[VERIFY] token_len={len(token)} url={url}')
           payload = json.dumps({'type':'bot_reply','chat_id':'${INPUT_CHAT_ID}','text':'[callback-verify]','timestamp':'2026-01-01T00:00:00Z'}).encode()
-          req = urllib.request.Request(url, data=payload, headers={'Content-Type':'application/json','X-Secret':token})
+          req = urllib.request.Request(url, data=payload, headers={'Content-Type':'application/json','X-Secret':token,'User-Agent':'meltan-404-bot/1.0'})
           try:
               resp = urllib.request.urlopen(req, timeout=10)
               print(f'[VERIFY] SUCCESS: {resp.status} {resp.read().decode()}')
