@@ -16,7 +16,7 @@ def main():
     try:
         result = subprocess.run(
             [sys.executable, "-m", "yt_dlp",
-             "-f", "b[height<=360]/b",
+             "-f", "b",
              "-o", output_template,
              "--no-playlist", "--no-overwrites",
              "--restrict-filenames", "--print-json", url],

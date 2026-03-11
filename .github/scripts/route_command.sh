@@ -73,13 +73,27 @@ case "$TEXT" in
       FILESIZE=0
     fi
 
-    if [ "$FILESIZE" -le 50000000 ]; then
-      send_video "$CHAT_ID" "$FILE_PATH" "$TITLE" || send_error "影片傳送失敗"
-      post_callback "[影片] $TITLE"
-    else
-      MSG="⚠️ 影片太大 ($(( FILESIZE / 1048576 ))MB)，超過 Telegram 50MB 限制"
+    # Upload to GitHub Release and return URL
+    FILENAME=$(basename "$FILE_PATH")
+    TAG="dl-$(date +%Y%m%d-%H%M%S)"
+    SIZE_MB=$(( FILESIZE / 1048576 ))
+
+    send_msg "$CHAT_ID" "📤 正在上傳影片 (${SIZE_MB}MB)..." || true
+
+    gh release create "$TAG" "$FILE_PATH" \
+      --title "📹 $TITLE" \
+      --notes "Downloaded via /download" \
+      --latest=false 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+      RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+      DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${FILENAME}"
+      MSG="📹 $TITLE (${SIZE_MB}MB)
+🔗 $DOWNLOAD_URL"
       send_msg "$CHAT_ID" "$MSG"
-      post_callback "$MSG"
+      post_callback "[影片] $MSG"
+    else
+      send_error "上傳至 Release 失敗"
     fi
     set_output false
     ;;
