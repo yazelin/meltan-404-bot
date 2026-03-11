@@ -119,26 +119,5 @@ jobs:
           # Write callback config to file (Copilot CLI may not pass env vars to subprocesses)
           echo "{\"url\":\"${CALLBACK_URL}\",\"token\":\"${CALLBACK_TOKEN}\"}" > /tmp/.callback_config
 
-          # Debug: verify callback token works
-          python3 -c "
-          import json, urllib.request, urllib.error
-          with open('/tmp/.callback_config') as f:
-              cfg = json.load(f)
-          token = cfg['token']
-          url = cfg['url']
-          print(f'[VERIFY] token_len={len(token)} url={url}')
-          payload = json.dumps({'type':'bot_reply','chat_id':'${INPUT_CHAT_ID}','text':'[callback-verify]','timestamp':'2026-01-01T00:00:00Z'}).encode()
-          req = urllib.request.Request(url, data=payload, headers={'Content-Type':'application/json','X-Secret':token,'User-Agent':'meltan-404-bot/1.0'})
-          try:
-              resp = urllib.request.urlopen(req, timeout=10)
-              print(f'[VERIFY] SUCCESS: {resp.status} {resp.read().decode()}')
-          except urllib.error.HTTPError as e:
-              body = e.read().decode() if e.fp else 'no body'
-              print(f'[VERIFY] HTTP {e.code}: {body}')
-              print(f'[VERIFY] Response headers: {dict(e.headers)}')
-          except Exception as e:
-              print(f'[VERIFY] ERROR: {type(e).__name__}: {e}')
-          "
-
           PROMPT=$(printf "%s%b" "$PROMPT" "$CONTEXT")
           copilot --model gpt-5-mini --autopilot --yolo --max-autopilot-continues 10 -p "$PROMPT"
