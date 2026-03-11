@@ -8,4 +8,4 @@ ALLOWED_CHATS = ""
 
 [[kv_namespaces]]
 binding = "BOT_MEMORY"
-id = "PLACEHOLDER_KV_ID"
+id = "77dde814062748b5b4ffe7fd3690d16c"
