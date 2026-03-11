@@ -23,9 +23,11 @@ def post_callback(chat_id, text):
         headers={"Content-Type": "application/json", "X-Secret": callback_token},
     )
     try:
-        urllib.request.urlopen(req, timeout=5).read()
+        resp = urllib.request.urlopen(req, timeout=5)
+        resp_body = resp.read().decode()
+        print(f"[post_callback] OK: {resp_body}", file=sys.stderr)
     except Exception as e:
-        print(f"[post_callback] FAILED: {e}", file=sys.stderr)
+        print(f"[post_callback] FAILED: url={callback_url} err={e}", file=sys.stderr)
 
 def main():
     if len(sys.argv) < 3:
