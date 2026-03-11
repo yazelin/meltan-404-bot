@@ -90,37 +90,8 @@ case "$TEXT" in
     ;;
 
   /draw\ *)
-    if [ -z "${HF_TOKEN:-}" ]; then
-      send_msg "$CHAT_ID" "⚙️ 此功能需要 HF_TOKEN，請設定 HuggingFace token"
-      set_output false; exit 0
-    fi
-    DESCRIPTION="${TEXT#/draw }"
-    DESCRIPTION="${DESCRIPTION#"${DESCRIPTION%%[![:space:]]*}"}"
-
-    # Parse optional model: /draw model:flux-dev prompt here
-    MODEL_KEY="flux-schnell"
-    if [[ "$DESCRIPTION" =~ ^model:([a-z0-9-]+)[[:space:]]+(.*) ]]; then
-      MODEL_KEY="${BASH_REMATCH[1]}"
-      DESCRIPTION="${BASH_REMATCH[2]}"
-    fi
-
-    send_msg "$CHAT_ID" "🎨 正在生成圖片 ($MODEL_KEY)，請稍候..." || true
-
-    IMG_RESULT=$(generate_image "$DESCRIPTION" "$MODEL_KEY") || true
-    IMG_OK=$(printf '%s' "$IMG_RESULT" | json_field ok False || echo "False")
-
-    if [ "$IMG_OK" = "True" ]; then
-      IMG_PATH=$(printf '%s' "$IMG_RESULT" | json_field file_path "" || echo "")
-      IMG_MODEL=$(printf '%s' "$IMG_RESULT" | json_field model "unknown" || echo "unknown")
-      CAPTION="$DESCRIPTION
-🤖 $IMG_MODEL"
-      send_photo "$CHAT_ID" "$IMG_PATH" "$CAPTION" || send_error "圖片傳送失敗"
-      post_callback "[圖片] $CAPTION"
-    else
-      ERROR=$(printf '%s' "$IMG_RESULT" | json_field error "圖片生成失敗" || echo "圖片生成失敗")
-      send_error "圖片生成失敗: $ERROR"
-    fi
-    set_output false
+    # Route to Copilot CLI for prompt optimization + image generation
+    set_output true
     ;;
 
   /draw)

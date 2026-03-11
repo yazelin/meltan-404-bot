@@ -75,6 +75,7 @@ jobs:
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.CHILD_COPILOT_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
           INPUT_CHAT_ID: ${{ inputs.chat_id }}
           INPUT_USERNAME: ${{ inputs.username }}
           INPUT_TEXT: ${{ inputs.text }}
