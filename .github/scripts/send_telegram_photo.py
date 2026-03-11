@@ -4,6 +4,28 @@ Usage: python send_telegram_photo.py <chat_id> <photo_path> [caption]
 Env: TELEGRAM_BOT_TOKEN
 """
 import json, os, sys, urllib.request
+from datetime import datetime, timezone
+
+def post_callback(chat_id, text):
+    callback_url = os.environ.get("CALLBACK_URL", "")
+    callback_token = os.environ.get("CALLBACK_TOKEN", "")
+    if not callback_url or not callback_token:
+        return
+    payload = json.dumps({
+        "type": "bot_reply",
+        "chat_id": chat_id,
+        "text": text[:500],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }).encode()
+    req = urllib.request.Request(
+        callback_url,
+        data=payload,
+        headers={"Content-Type": "application/json", "X-Secret": callback_token},
+    )
+    try:
+        urllib.request.urlopen(req, timeout=5).read()
+    except Exception as e:
+        print(f"[post_callback] FAILED: {e}", file=sys.stderr)
 
 def main():
     if len(sys.argv) < 3:
@@ -27,6 +49,7 @@ def main():
     req = urllib.request.Request(url, data=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
     resp = urllib.request.urlopen(req)
     data = json.loads(resp.read())
+    post_callback(chat_id, f"[圖片] {caption}" if caption else "[圖片]")
     print(json.dumps({"ok": True, "message_id": data.get("result", {}).get("message_id")}))
 
 if __name__ == "__main__":
