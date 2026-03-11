@@ -67,31 +67,33 @@ You have the following tool scripts available. Run them with `python`:
 
 ## Video fallback search workflow
 
-When `DOWNLOAD_FAILED_URL` env var is set, the original YouTube download has failed. Your job is to find and download the same video from an alternative source.
+When `DOWNLOAD_FAILED_URL` env var is set, a YouTube download has failed. Your job is to find the same video on a NON-YouTube platform and download it from there.
 
-1. **Extract video info** — Run `python -m yt_dlp --dump-json --no-download "DOWNLOAD_FAILED_URL"` to get the video title and description (this often works even when download fails)
-   - If that also fails, extract keywords from the URL itself
-2. **Search for alternatives** — Use Tavily search to find the same video on other platforms:
-   - Search query: `"<video title>" site:bilibili.com OR site:dailymotion.com OR site:twitter.com OR site:x.com OR site:facebook.com OR site:nicovideo.jp`
-   - Also try a broader search: `"<video title>" video`
-3. **Try to download** — For each alternative URL found (try up to 3):
+**⚠️ CRITICAL: NEVER attempt to download from YouTube (youtube.com, youtu.be, or any YouTube URL). YouTube is blocked on this server. Only download from alternative platforms.**
+
+1. **Extract video ID and search** — The YouTube URL contains a video ID (e.g. `v=pYpJP4whWg4`). Use it to search:
+   - Use Tavily search with the YouTube URL itself — Tavily can read the page and extract the video title
+   - Search query example: `youtube.com/watch?v=pYpJP4whWg4`
+   - Then search for the title on other platforms: `"<video title>" site:bilibili.com OR site:dailymotion.com OR site:twitter.com OR site:x.com OR site:facebook.com OR site:nicovideo.jp OR site:vimeo.com`
+2. **Download from alternative source** — For each non-YouTube URL found (try up to 3):
    ```
    python .github/scripts/download_video.py "<alternative_url>"
    ```
+   - **DO NOT** pass any youtube.com or youtu.be URL to download_video.py
    - If successful, upload to GitHub Release:
      ```bash
      TAG="dl-$(date +%Y%m%d-%H%M%S)"
      gh release create "$TAG" "<file_path>" --title "📹 <title>" --notes "Downloaded via /download (alternative source)" --latest=false
      ```
-   - Send the download URL: `python .github/scripts/send_telegram_message.py <chat_id> "📹 <title>\n🔗 <download_url>\n📌 來源: <platform>"`
+   - Send result: `python .github/scripts/send_telegram_message.py <chat_id> "📹 <title>\n🔗 <download_url>\n📌 來源: <platform>"`
    - Stop after the first successful download
-4. **If all fail** — Send a helpful message:
+3. **If no alternative found** — Send message:
    ```
-   python .github/scripts/send_telegram_message.py <chat_id> "❌ 無法找到替代來源下載此影片。\n\n建議：\n1. 嘗試直接從其他平台分享影片連結\n2. YouTube 影片因登入限制無法在伺服器上下載"
+   python .github/scripts/send_telegram_message.py <chat_id> "❌ 找不到此 YouTube 影片的替代來源。\n\n建議：直接提供其他平台的影片連結（如 Bilibili、Dailymotion、X、Facebook、Vimeo 等）"
    ```
 
 ### Supported platforms (yt-dlp supports 1000+ sites)
-Good alternatives to search: Bilibili, Dailymotion, X/Twitter, Facebook, Niconico, Vimeo
+Good alternatives: Bilibili, Dailymotion, X/Twitter, Facebook, Niconico, Vimeo, Instagram, TikTok
 
 ## Translation workflow
 
