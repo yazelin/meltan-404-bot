@@ -118,6 +118,25 @@ jobs:
 
           # Write callback config to file (Copilot CLI may not pass env vars to subprocesses)
           echo "{\"url\":\"${CALLBACK_URL}\",\"token\":\"${CALLBACK_TOKEN}\"}" > /tmp/.callback_config
+          echo "[DEBUG] callback_config written:"
+          cat /tmp/.callback_config | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'url_len={len(d.get(\"url\",\"\"))} token_len={len(d.get(\"token\",\"\"))}')"
+
+          # Test callback directly before Copilot
+          python3 -c "
+          import json, os
+          with open('/tmp/.callback_config') as f:
+              cfg = json.load(f)
+          print(f'[PRE-TEST] url={cfg[\"url\"][:30]}... token_len={len(cfg[\"token\"])}')
+          import urllib.request
+          from datetime import datetime, timezone
+          payload = json.dumps({'type':'bot_reply','chat_id':'${INPUT_CHAT_ID}','text':'[pre-copilot test]','timestamp':datetime.now(timezone.utc).isoformat()}).encode()
+          req = urllib.request.Request(cfg['url'], data=payload, headers={'Content-Type':'application/json','X-Secret':cfg['token']})
+          try:
+              resp = urllib.request.urlopen(req, timeout=5)
+              print(f'[PRE-TEST] callback response: {resp.read().decode()}')
+          except Exception as e:
+              print(f'[PRE-TEST] callback FAILED: {e}')
+          "
 
           PROMPT=$(printf "%s%b" "$PROMPT" "$CONTEXT")
           copilot --model gpt-5-mini --autopilot --yolo --max-autopilot-continues 10 -p "$PROMPT"
