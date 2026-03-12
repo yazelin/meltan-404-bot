@@ -89,6 +89,8 @@ meltan-404-bot/
 │   ├── index.html      # Dashboard 頁面
 │   ├── app.js          # 前端邏輯
 │   └── style.css       # 樣式
+├── docs/
+│   └── superpowers/    # 設計文件與規劃
 ├── prompt.md           # Copilot CLI 的系統提示詞
 ├── setup.sh            # 一鍵設定腳本
 ├── update-cookies.sh   # YouTube Cookies 更新腳本
@@ -103,6 +105,7 @@ meltan-404-bot/
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) (`wrangler`)
 - Node.js 20+
 - Python 3
+- `openssl`、`curl`
 - 一個 [Telegram Bot Token](https://core.telegram.org/bots#botfather)
 
 ### 一鍵安裝
@@ -117,8 +120,8 @@ Setup 腳本會自動：
 3. 安裝 npm 依賴
 4. 設定所有 Cloudflare Worker secrets
 5. 部署 Worker
-6. 註冊 Telegram Webhook
-7. 設定 GitHub Actions secrets
+6. 設定 GitHub Actions secrets
+7. 註冊 Telegram Webhook
 
 ### 需要的 Secrets
 
