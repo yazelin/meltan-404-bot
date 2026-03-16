@@ -47,6 +47,9 @@ def main():
     chat_id = sys.argv[1]
     photo_path = sys.argv[2]
     caption = sys.argv[3] if len(sys.argv) > 3 else ""
+    # Telegram sendPhoto caption limit is 1024 characters
+    if len(caption) > 1024:
+        caption = caption[:1021] + "..."
     boundary = "----TelegramUpload"
     body = b""
     body += f"--{boundary}\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n{chat_id}\r\n".encode()
@@ -59,8 +62,16 @@ def main():
     body += f"\r\n--{boundary}--\r\n".encode()
     url = f"https://api.telegram.org/bot{token}/sendPhoto"
     req = urllib.request.Request(url, data=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
-    resp = urllib.request.urlopen(req)
-    data = json.loads(resp.read())
+    try:
+        resp = urllib.request.urlopen(req)
+        data = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="replace")
+        print(json.dumps({"ok": False, "error": f"Telegram API HTTP {e.code}: {error_body[:300]}"}))
+        sys.exit(1)
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": str(e)}))
+        sys.exit(1)
     post_callback(chat_id, f"[圖片] {caption}" if caption else "[圖片]")
     print(json.dumps({"ok": True, "message_id": data.get("result", {}).get("message_id")}))
 

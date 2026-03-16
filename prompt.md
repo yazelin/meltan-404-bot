@@ -59,17 +59,20 @@ You have the following tool scripts available. Run them with `python`:
      - `/draw model:sdxl sunset over mountains` → MODEL=`sdxl`, DESCRIPTION=`sunset over mountains`
      - `/draw 一隻太空貓` → MODEL=`flux-schnell`, DESCRIPTION=`一隻太空貓`
 2. Send a "processing" message: `python .github/scripts/send_telegram_message.py <chat_id> "🎨 正在使用 MODEL 生成圖片，請稍候..."`
-3. **Optimize the prompt**: Transform the user's description into a detailed English image generation prompt:
-   - Translate non-English descriptions to English
-   - Add visual details: lighting, style, composition, colors, atmosphere
-   - Keep it under 200 words
+3. **Optimize the prompt**: Improve the user's description for image generation:
+   - If the description is already a detailed English prompt (50+ words with visual/style details), use it as-is — do NOT over-expand it
+   - If the description is short or non-English, transform it into a detailed English prompt:
+     - Translate non-English descriptions to English
+     - Add visual details: lighting, style, composition, colors, atmosphere
+   - Do NOT limit prompt length — longer, more detailed prompts produce better results
    - Example: "一隻貓" → "A fluffy orange tabby cat sitting on a windowsill, warm golden sunset light streaming through the window, soft bokeh background, photorealistic, high detail, warm color palette"
 4. **Generate the image** — you MUST pass the model as the second argument:
    ```
    python .github/scripts/generate_image.py "<optimized_english_prompt>" MODEL
    ```
    For example: `python .github/scripts/generate_image.py "A cat in space..." flux-dev`
-5. If successful, send the photo: `python .github/scripts/send_telegram_photo.py <chat_id> <file_path> "<original_description>\n🤖 MODEL"`
+5. If successful, send the photo: `python .github/scripts/send_telegram_photo.py <chat_id> <file_path> "<original_description> 🤖 MODEL"`
+   - **IMPORTANT**: Use the user's ORIGINAL short description as caption (e.g. "一隻太空貓"), NOT the optimized English prompt. The caption must be under 1024 characters.
 6. If failed, send error message explaining what went wrong
 
 ### Image generation guidelines
