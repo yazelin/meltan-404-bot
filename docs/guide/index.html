@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>meltan-404-bot 安裝指南</title>
+  <meta name="description" content="從零開始架設 meltan-404-bot：不用租伺服器的 Telegram AI 機器人，完整架構說明與新手安裝教學。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='2' y='6' width='20' height='14' rx='4' fill='%2310b981'/><circle cx='9' cy='12' r='2' fill='white'/><circle cx='15' cy='12' r='2' fill='white'/><rect x='10' y='16' width='4' height='1.5' rx='.75' fill='rgba(255,255,255,.7)'/></svg>">
+  <style>
+    :root{
+      --paper:#f4f6f5;
+      --card:#ffffff;
+      --ink:#1c2823;
+      --muted:#5b6a63;
+      --pine:#10342a;
+      --pine-soft:#1a4437;
+      --emerald:#0e9f6e;
+      --brass:#c9a227;
+      --brass-soft:#f3e8c8;
+      --line:#d8dedb;
+      --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+    @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+    body{
+      font-family:"Noto Sans TC",system-ui,sans-serif;
+      background:var(--paper);color:var(--ink);
+      line-height:1.85;font-size:1rem;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--emerald);text-decoration:none}
+    a:hover{text-decoration:underline}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--emerald);outline-offset:2px}
+    code{font-family:var(--mono);font-size:.9em;background:#e7ece9;padding:.1em .4em;border-radius:4px}
+
+    /* ---------- header ---------- */
+    .topbar{background:var(--pine);color:#fff;padding:.7rem 1.25rem;display:flex;align-items:center;gap:.6rem}
+    .topbar svg{flex:none}
+    .topbar .name{font-weight:700;letter-spacing:.02em}
+    .topbar .links{margin-left:auto;display:flex;gap:1.1rem;font-size:.88rem}
+    .topbar a{color:#bcd8cd}
+    .topbar a:hover{color:#fff;text-decoration:none}
+
+    /* ---------- hero ---------- */
+    .hero{background:linear-gradient(160deg,var(--pine) 0%,var(--pine-soft) 100%);color:#fff;padding:4.5rem 1.25rem 4rem}
+    .hero-inner{max-width:60rem;margin:0 auto}
+    .hero .eyebrow{color:var(--brass);font-size:.85rem;font-weight:700;letter-spacing:.22em;margin-bottom:1rem}
+    .hero h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(1.9rem,4.5vw,3.1rem);line-height:1.3;max-width:36rem}
+    .hero p.sub{color:#c6dcd2;max-width:34rem;margin-top:1.2rem;font-size:1.05rem}
+    .hero .chips{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:2rem}
+    .chip{border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:.3rem 1rem;font-size:.85rem;color:#dcebe4}
+    .chip b{color:var(--brass);font-weight:700}
+
+    /* ---------- layout ---------- */
+    .layout{max-width:74rem;margin:0 auto;padding:3rem 1.25rem;display:grid;grid-template-columns:15rem minmax(0,1fr);gap:3.5rem}
+    @media (max-width:960px){.layout{grid-template-columns:minmax(0,1fr)}}
+    .toc{position:sticky;top:1.5rem;align-self:start;font-size:.88rem}
+    @media (max-width:960px){.toc{position:static;border:1px solid var(--line);border-radius:10px;padding:1rem 1.2rem;background:var(--card)}}
+    .toc .toc-title{font-weight:700;color:var(--muted);font-size:.78rem;letter-spacing:.14em;margin-bottom:.7rem}
+    .toc ol{list-style:none}
+    .toc li{margin:.35rem 0}
+    .toc a{color:var(--ink)}
+    .toc a:hover{color:var(--emerald)}
+    .toc .toc-sub{padding-left:1rem;color:var(--muted)}
+    .toc .toc-sub a{color:var(--muted)}
+
+    main{max-width:46rem;min-width:0}
+    .part{font-family:"Noto Serif TC",serif;font-weight:900;font-size:1.7rem;margin:3.5rem 0 .4rem;padding-top:1rem;border-top:3px solid var(--pine)}
+    .part:first-child{margin-top:0}
+    .part-lede{color:var(--muted);margin-bottom:2rem}
+    h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.25rem;margin:2.6rem 0 .8rem}
+    p{margin:.9rem 0}
+    ul,ol{padding-left:1.5rem;margin:.9rem 0}
+    li{margin:.35rem 0}
+    strong{font-weight:700}
+
+    /* ---------- step ---------- */
+    .step{margin:3rem 0;scroll-margin-top:1.5rem}
+    .step-hd{display:flex;align-items:center;gap:1rem;margin-bottom:.4rem}
+    .hex{flex:none;width:2.7rem;height:3rem;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+      background:var(--pine);color:var(--brass);display:grid;place-items:center;
+      font-weight:700;font-size:1.15rem;font-family:var(--mono)}
+    .step-hd h3{margin:0;font-size:1.35rem}
+    .step-meta{font-size:.82rem;color:var(--muted);margin:0 0 1rem 3.7rem}
+    .step-meta .opt{color:var(--brass);font-weight:700}
+
+    /* ---------- code blocks ---------- */
+    pre.cmd{position:relative;background:var(--pine);color:#e4efe9;border-radius:10px;
+      padding:1rem 1.2rem;margin:1rem 0;overflow-x:auto;font-size:.86rem;line-height:1.7}
+    pre.cmd code{background:none;padding:0;color:inherit;font-size:inherit}
+    pre.cmd .c{color:#7fa695}
+    pre.cmd button.copy{position:absolute;top:.55rem;right:.6rem;border:1px solid rgba(255,255,255,.3);
+      background:rgba(255,255,255,.08);color:#cfe3da;border-radius:6px;padding:.15rem .7rem;
+      font-size:.78rem;cursor:pointer;font-family:inherit}
+    pre.cmd button.copy:hover{background:rgba(255,255,255,.18)}
+
+    /* ---------- tables ---------- */
+    .tbl-wrap{overflow-x:auto;margin:1.2rem 0}
+    table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--card)}
+    th,td{border:1px solid var(--line);padding:.55rem .8rem;text-align:left;vertical-align:top}
+    th{background:#e9efec;font-weight:700;white-space:nowrap}
+    td code{white-space:nowrap}
+
+    /* ---------- callouts ---------- */
+    .note,.warn,.check{border-radius:10px;padding:1rem 1.2rem;margin:1.2rem 0;font-size:.92rem}
+    .note{background:#e6f3ee;border:1px solid #bcded0}
+    .warn{background:var(--brass-soft);border:1px solid #dcc37a}
+    .warn b:first-child,.note b:first-child{display:block;margin-bottom:.2rem}
+    .check{background:var(--card);border:1px solid var(--line)}
+    .check .check-title{font-weight:700;color:var(--pine);font-size:.8rem;letter-spacing:.12em;margin-bottom:.5rem}
+    .check ul{list-style:none;padding-left:0;margin:0}
+    .check li{padding-left:1.6rem;position:relative}
+    .check li::before{content:"";position:absolute;left:0;top:.45em;width:.85em;height:.85em;
+      border:2px solid var(--emerald);border-radius:3px}
+
+    /* ---------- architecture flow ---------- */
+    .flow{margin:1.6rem 0;display:flex;flex-direction:column;align-items:stretch}
+    .node{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--emerald);
+      border-radius:10px;padding:.9rem 1.2rem}
+    .node.alt{border-left-color:var(--brass)}
+    .node .node-name{font-weight:700}
+    .node .node-role{font-size:.82rem;color:var(--brass);font-weight:700;letter-spacing:.08em}
+    .node .node-desc{font-size:.88rem;color:var(--muted);margin-top:.15rem}
+    .arrow{align-self:center;text-align:center;color:var(--muted);font-size:.82rem;padding:.45rem 0;line-height:1.5}
+    .arrow::after{content:"↓";display:block;color:var(--emerald);font-size:1.05rem}
+
+    /* ---------- footer ---------- */
+    footer{background:var(--pine);color:#bcd8cd;margin-top:4rem;padding:2.2rem 1.25rem;font-size:.9rem}
+    footer .foot-inner{max-width:60rem;margin:0 auto;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between}
+    footer .foot-links{display:flex;gap:1.4rem}
+    footer a{color:#e4efe9}
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <svg width="24" height="24" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+    <rect x="3" y="9" width="24" height="16" rx="5" fill="#10b981"/>
+    <circle cx="11" cy="16" r="2.2" fill="white"/>
+    <circle cx="19" cy="16" r="2.2" fill="white"/>
+    <rect x="12" y="20" width="6" height="2" rx="1" fill="rgba(255,255,255,0.65)"/>
+    <rect x="11" y="3" width="8" height="7" rx="3" fill="#059669"/>
+    <circle cx="11" cy="3.5" r="2" fill="#6ee7b7"/>
+    <circle cx="19" cy="3.5" r="2" fill="#6ee7b7"/>
+  </svg>
+  <span class="name">meltan-404-bot</span>
+  <nav class="links" aria-label="站內連結">
+    <a href="../">Dashboard</a>
+    <a href="https://github.com/yazelin/meltan-404-bot">GitHub</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">架構說明+安裝指南</div>
+    <h1>把一台 AI 機器人裝進 Telegram，而且不用租伺服器</h1>
+    <p class="sub">meltan-404-bot 是一台跑在免費雲端服務上的 Telegram 聊天機器人：會聊天、畫圖、翻譯、寫研究報告、下載影片。這份指南假設你從來沒用過 GitHub 和 Cloudflare，一步一步帶你裝到能用為止。</p>
+    <div class="chips">
+      <span class="chip">預估時間 <b>60 到 90 分鐘</b></span>
+      <span class="chip">伺服器費用 <b>0 元</b></span>
+      <span class="chip">需要 <b>會複製貼上指令</b></span>
+    </div>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="toc" aria-label="目錄">
+    <div class="toc-title">目錄</div>
+    <ol>
+      <li><a href="#arch">第一部：認識架構</a>
+        <ol class="toc-sub">
+          <li><a href="#journey">一則訊息的旅程</a></li>
+          <li><a href="#components">每個服務在做什麼</a></li>
+          <li><a href="#cost">成本結構</a></li>
+        </ol>
+      </li>
+      <li><a href="#install">第二部：安裝</a>
+        <ol class="toc-sub">
+          <li><a href="#step1">1 申請帳號</a></li>
+          <li><a href="#step2">2 建立 Telegram Bot</a></li>
+          <li><a href="#step3">3 Fork 專案</a></li>
+          <li><a href="#step4">4 安裝命令列工具</a></li>
+          <li><a href="#step5">5 登入 GitHub 與 Cloudflare</a></li>
+          <li><a href="#step6">6 準備金鑰</a></li>
+          <li><a href="#step7">7 執行安裝腳本</a></li>
+          <li><a href="#step8">8 測試機器人</a></li>
+          <li><a href="#step9">9 啟用 Dashboard</a></li>
+        </ol>
+      </li>
+      <li><a href="#trouble">疑難排解</a></li>
+      <li><a href="#safety">費用與安全</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============ PART 1 ============ -->
+    <h2 class="part" id="arch">第一部：認識架構</h2>
+    <p class="part-lede">先花五分鐘看懂它怎麼運作，後面每個安裝步驟你都會知道自己在裝什麼。</p>
+
+    <p>一般聊天機器人需要一台 24 小時開機的伺服器待命。meltan-404-bot 改用兩個免費雲端服務拼起來：<strong>Cloudflare Worker</strong> 當接線生，<strong>GitHub Actions</strong> 當臨時工。接線生全年無休但只做轉接；臨時工收到工作才上工，做完就下班。兩邊都在免費額度內，所以伺服器費用是 0 元。</p>
+
+    <h3 id="journey">一則訊息的旅程</h3>
+    <p>假設你在 Telegram 輸入「/draw 一隻太空貓」，訊息會這樣走：</p>
+
+    <div class="flow">
+      <div class="node">
+        <div class="node-role">你的手機</div>
+        <div class="node-name">Telegram</div>
+        <div class="node-desc">你打字送出訊息。Telegram 官方伺服器會把訊息轉送到你事先登記的網址（稱為 Webhook）。</div>
+      </div>
+      <div class="arrow">Webhook 通知</div>
+      <div class="node">
+        <div class="node-role">接線生，全年無休</div>
+        <div class="node-name">Cloudflare Worker</div>
+        <div class="node-desc">一小段跑在 Cloudflare 全球機房的程式。它驗證訊息真的來自 Telegram、確認發訊者在白名單上、把對話紀錄存進 KV 資料庫，然後按鈴叫醒 GitHub Actions。簡單指令如 /reset、/models 它自己就回覆了。</div>
+      </div>
+      <div class="arrow">workflow_dispatch 觸發</div>
+      <div class="node">
+        <div class="node-role">臨時工，叫了才上工</div>
+        <div class="node-name">GitHub Actions</div>
+        <div class="node-desc">GitHub 免費出借的臨時電腦。開機後由路由腳本判斷工作類型：下載影片直接跑 yt-dlp；聊天、翻譯、畫圖、研究則交給 Copilot CLI（gpt-5-mini 模型）思考，畫圖再呼叫 HuggingFace 產生圖片。</div>
+      </div>
+      <div class="arrow">回覆送出+Callback 回存</div>
+      <div class="node">
+        <div class="node-role">結果回到你手上</div>
+        <div class="node-name">Telegram+KV 資料庫</div>
+        <div class="node-desc">臨時工把回覆（文字、圖片或影片）直接傳回你的 Telegram，同時回報給 Worker 存進 KV，當作下次對話的記憶。</div>
+      </div>
+      <div class="arrow">隨時可查</div>
+      <div class="node alt">
+        <div class="node-role">觀察窗</div>
+        <div class="node-name">Dashboard(GitHub Pages)</div>
+        <div class="node-desc">一個靜態網頁，讀取 Worker 的 API 顯示使用統計和對話紀錄。就是你現在看的這個網站的首頁。</div>
+      </div>
+    </div>
+
+    <h3 id="components">每個服務在做什麼</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>服務</th><th>在這個專案的角色</th><th>為什麼需要它</th></tr></thead>
+        <tbody>
+          <tr><td>Telegram</td><td>聊天介面</td><td>你和機器人對話的地方，Bot 帳號免費申請。</td></tr>
+          <tr><td>Cloudflare Worker</td><td>Webhook 接收+API+KV 儲存</td><td>需要一個 24 小時在線的網址讓 Telegram 送訊息，Worker 免費額度綽綽有餘。</td></tr>
+          <tr><td>GitHub Actions</td><td>實際幹活的臨時電腦</td><td>跑 AI 和下載影片需要完整的電腦環境，公開 repo 的 Actions 免費。</td></tr>
+          <tr><td>GitHub Copilot</td><td>大腦（gpt-5-mini）</td><td>聊天、翻譯、研究、決定怎麼畫圖，都由它思考。</td></tr>
+          <tr><td>HuggingFace</td><td>畫圖 API</td><td>/draw 指令實際產生圖片的服務，選用。</td></tr>
+          <tr><td>Tavily</td><td>網路搜尋 API</td><td>/research 查資料、YouTube 影片找替代來源，選用。</td></tr>
+          <tr><td>GitHub Pages</td><td>Dashboard 網頁空間</td><td>免費放靜態網頁，顯示統計和對話紀錄。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="cost">成本結構</h3>
+    <p>訊息按複雜度分層處理，越簡單的層級成本越低：</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>層級</th><th>處理內容</th><th>成本</th></tr></thead>
+        <tbody>
+          <tr><td>Worker 直接處理</td><td><code>/reset</code>、<code>/models</code></td><td>免費</td></tr>
+          <tr><td>Shell 腳本</td><td><code>/download</code>(yt-dlp)</td><td>免費</td></tr>
+          <tr><td>Copilot CLI</td><td>聊天、<code>/translate</code>、<code>/research</code>、<code>/draw</code></td><td>每則約 1 個 premium request</td></tr>
+          <tr><td>HuggingFace API</td><td>圖片生成</td><td>每張約 0.001 美元</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>詳細的免費額度與付費項目整理在最後的<a href="#safety">費用與安全</a>一節。</p>
+
+    <!-- ============ PART 2 ============ -->
+    <h2 class="part" id="install">第二部：安裝</h2>
+    <p class="part-lede">照順序做完九個步驟。每一步結尾有「完成確認」清單，打勾了再往下走。</p>
+
+    <div class="note"><b>開始之前</b>你需要一台 macOS、Linux 或 Windows 電腦，和一個能收簡訊或 Email 的手機（註冊帳號用）。所有指令都是複製貼上，不需要會寫程式。</div>
+
+    <!-- step 1 -->
+    <section class="step" id="step1">
+      <div class="step-hd"><div class="hex">1</div><h3>申請帳號</h3></div>
+      <p class="step-meta">約 20 分鐘，全部免費申請</p>
+      <p>下面是需要的帳號。Telegram 你可能已經有了；HuggingFace 和 Tavily 是選用，跳過的話對應功能不能用，其他功能不受影響。</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>帳號</th><th>去哪申請</th><th>用途</th><th>費用</th></tr></thead>
+          <tbody>
+            <tr><td>Telegram</td><td>手機安裝 Telegram App</td><td>聊天介面</td><td>免費</td></tr>
+            <tr><td>GitHub</td><td><a href="https://github.com/signup" rel="noopener">github.com/signup</a></td><td>放程式碼、跑 Actions、Copilot</td><td>帳號免費</td></tr>
+            <tr><td>GitHub Copilot</td><td><a href="https://github.com/features/copilot" rel="noopener">github.com/features/copilot</a></td><td>機器人的大腦</td><td>Free 方案有每月額度，Pro 每月 10 美元</td></tr>
+            <tr><td>Cloudflare</td><td><a href="https://dash.cloudflare.com/sign-up" rel="noopener">dash.cloudflare.com/sign-up</a></td><td>跑 Worker 接線生</td><td>免費方案即可，不用綁信用卡</td></tr>
+            <tr><td>HuggingFace（選用）</td><td><a href="https://huggingface.co/join" rel="noopener">huggingface.co/join</a></td><td>/draw 畫圖</td><td>有免費額度，超過按量計費</td></tr>
+            <tr><td>Tavily（選用）</td><td><a href="https://app.tavily.com" rel="noopener">app.tavily.com</a></td><td>/research 搜尋</td><td>有免費額度</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><b>Copilot 是唯一可能要花錢的必要項目</b>登入 GitHub 後到 Copilot 頁面啟用。Free 方案就能動，但每月額度有限；想穩定使用建議 Pro 方案。機器人每處理一則需要 AI 的訊息，大約消耗 1 個 premium request。</div>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>手機能開啟 Telegram</li>
+          <li>能登入 GitHub，且 Copilot 已啟用（Free 或 Pro）</li>
+          <li>能登入 Cloudflare Dashboard</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 2 -->
+    <section class="step" id="step2">
+      <div class="step-hd"><div class="hex">2</div><h3>建立 Telegram Bot</h3></div>
+      <p class="step-meta">約 5 分鐘，在手機或電腦的 Telegram 完成</p>
+      <p>Telegram 的機器人是向官方機器人 <strong>@BotFather</strong> 申請的：</p>
+      <ol>
+        <li>在 Telegram 搜尋 <code>@BotFather</code>（認明藍勾勾），開始對話。</li>
+        <li>送出 <code>/newbot</code>。</li>
+        <li>它會問機器人的顯示名稱，隨意取，例如 <code>My Meltan Bot</code>。</li>
+        <li>再問帳號名稱，必須以 <code>bot</code> 結尾且全網不重複，例如 <code>my_meltan_404_bot</code>。</li>
+        <li>成功後 BotFather 會給你一串 <strong>Bot Token</strong>，長得像 <code>1234567890:AAHxxx...</code>。複製存好，安裝腳本會用到。</li>
+      </ol>
+      <p>接著查你自己的 Telegram User ID（數字），機器人只回覆白名單上的人：</p>
+      <ol>
+        <li>在 Telegram 搜尋 <code>@userinfobot</code>，開始對話。</li>
+        <li>它會回覆你的 Id，是一串數字，複製存好。</li>
+      </ol>
+      <div class="warn"><b>Bot Token 等於機器人的鑰匙</b>拿到 Token 的人就能控制你的機器人。不要貼到公開的地方；如果外流，回 BotFather 用 <code>/revoke</code> 換一把新的。</div>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>手上有一串 Bot Token</li>
+          <li>手上有自己的 User ID 數字</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 3 -->
+    <section class="step" id="step3">
+      <div class="step-hd"><div class="hex">3</div><h3>Fork 專案到自己帳號</h3></div>
+      <p class="step-meta">約 5 分鐘，在瀏覽器完成</p>
+      <p>Fork 的意思是把這份程式碼複製一份到你自己的 GitHub 帳號底下，機器人會跑在你的副本上：</p>
+      <ol>
+        <li>打開 <a href="https://github.com/yazelin/meltan-404-bot" rel="noopener">github.com/yazelin/meltan-404-bot</a>，點右上角的 <strong>Fork</strong>，再點 <strong>Create fork</strong>。</li>
+        <li>完成後網址會變成 <code>github.com/你的帳號/meltan-404-bot</code>，之後的操作都在這個副本上。</li>
+        <li>到副本的 <strong>Actions</strong> 分頁。GitHub 預設會停用 fork 來的自動化流程，看到綠色按鈕 <strong>I understand my workflows, go ahead and enable them</strong> 就點下去。</li>
+      </ol>
+      <div class="warn"><b>這一步最常被漏掉</b>沒有啟用 Actions，機器人就永遠不會動工。之後如果發現訊息毫無反應，先回來檢查這裡。</div>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>自己帳號底下有 meltan-404-bot 這個 repo</li>
+          <li>Actions 分頁已啟用，看得到 Telegram Chatbot 和 Deploy Dashboard 兩個 workflow</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 4 -->
+    <section class="step" id="step4">
+      <div class="step-hd"><div class="hex">4</div><h3>安裝命令列工具</h3></div>
+      <p class="step-meta">約 15 分鐘，依你的作業系統擇一</p>
+      <p>安裝腳本需要這些工具：<code>git</code>、<code>gh</code>（GitHub 官方指令）、Node.js 20 以上、<code>wrangler</code>（Cloudflare 官方指令）、<code>python3</code>、<code>openssl</code>、<code>curl</code>。照你的系統做：</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">macOS</h4>
+      <p>打開「終端機」App，先裝 <a href="https://brew.sh" rel="noopener">Homebrew</a>（如果還沒有），然後：</p>
+      <pre class="cmd"><code>brew install git gh node python3
+npm install -g wrangler</code></pre>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">Windows</h4>
+      <p>安裝腳本是 bash 寫的，建議透過 WSL（Windows 內建的 Linux 環境）執行。以系統管理員開啟 PowerShell:</p>
+      <pre class="cmd"><code>wsl --install</code></pre>
+      <p>重開機、設定好 Ubuntu 的使用者密碼後，打開 Ubuntu 視窗，改照下面的 Ubuntu 步驟做。</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">Ubuntu/Debian（含 WSL）</h4>
+      <pre class="cmd"><code><span class="c"># 基本工具</span>
+sudo apt update
+sudo apt install -y git gh curl python3 openssl
+
+<span class="c"># Node.js 20:用 nvm 安裝(apt 內建版本太舊)</span>
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 20
+
+<span class="c"># Cloudflare 的指令工具</span>
+npm install -g wrangler</code></pre>
+
+      <p>最後確認版本，每一行都要有回應而不是 command not found:</p>
+      <pre class="cmd"><code>git --version && gh --version && node --version && wrangler --version && python3 --version</code></pre>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>上面的版本確認指令每項都印出版本號</li>
+          <li><code>node --version</code> 是 v20 以上</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 5 -->
+    <section class="step" id="step5">
+      <div class="step-hd"><div class="hex">5</div><h3>登入 GitHub 與 Cloudflare</h3></div>
+      <p class="step-meta">約 10 分鐘</p>
+      <p>先讓 <code>gh</code> 登入你的 GitHub 帳號。跑下面的指令，依提示選 <strong>GitHub.com</strong>、<strong>HTTPS</strong>、<strong>Login with a web browser</strong>，把畫面上的一次性代碼貼到瀏覽器：</p>
+      <pre class="cmd"><code>gh auth login</code></pre>
+      <p>再讓 <code>wrangler</code> 登入 Cloudflare，會自動開瀏覽器要你按 Allow:</p>
+      <pre class="cmd"><code>wrangler login</code></pre>
+      <div class="note"><b>WSL 使用者</b>如果瀏覽器沒有自動打開，把終端機印出的網址手動複製到 Windows 的瀏覽器開啟即可。</div>
+      <p>然後把你 fork 的副本下載到電腦（記得把「你的帳號」換成 GitHub 帳號名）：</p>
+      <pre class="cmd"><code>gh repo clone 你的帳號/meltan-404-bot
+cd meltan-404-bot</code></pre>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li><code>gh auth status</code> 顯示 Logged in</li>
+          <li><code>wrangler whoami</code> 顯示你的 Cloudflare 帳號</li>
+          <li>電腦裡有 meltan-404-bot 資料夾，而且已經 <code>cd</code> 進去</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 6 -->
+    <section class="step" id="step6">
+      <div class="step-hd"><div class="hex">6</div><h3>準備金鑰</h3></div>
+      <p class="step-meta">約 10 分鐘，把每一把金鑰存進記事本備用</p>
+      <p>安裝腳本會依序問你四把金鑰。先準備好，到時候直接貼：</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">A. Telegram Bot Token（必要）</h4>
+      <p>步驟 2 從 BotFather 拿到的那串。</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">B. GitHub PAT（可直接跳過）</h4>
+      <p>Worker 需要一把 GitHub 鑰匙才能觸發 Actions。腳本問到這題時<strong>直接按 Enter 跳過</strong>，它會自動用你剛登入的 <code>gh</code> 帳號授權，最簡單。想收窄權限的進階使用者，可以到 GitHub 的 Settings、Developer settings、Fine-grained tokens 建一把只授權這個 repo 的 token，權限給 Actions（Read and write）和 Contents(Read-only)。</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">C. Copilot Token（必要）</h4>
+      <p>臨時工上工時要代表你使用 Copilot。用同一個已開通 Copilot 的帳號執行：</p>
+      <pre class="cmd"><code>gh auth token</code></pre>
+      <p>印出來的那串就是，複製備用。</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">D. HuggingFace Token（選用，/draw 畫圖用）</h4>
+      <p>登入 HuggingFace 後到 <a href="https://huggingface.co/settings/tokens" rel="noopener">Settings 的 Access Tokens</a>，按 <strong>Create new token</strong>，類型選 <strong>Read</strong>，建立後複製 <code>hf_</code> 開頭的字串。跳過則 /draw 不能用。</p>
+
+      <h4 style="margin-top:1.8rem;font-weight:700">E. Tavily API Key（選用，/research 用）</h4>
+      <p>登入 <a href="https://app.tavily.com" rel="noopener">app.tavily.com</a>，首頁就能複製 <code>tvly-</code> 開頭的 API Key。跳過則 /research 和 YouTube 替代搜尋不能用。</p>
+
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>記事本裡有：Bot Token、Copilot Token</li>
+          <li>要用畫圖的話，有 hf_ 開頭的 Token</li>
+          <li>要用研究的話，有 tvly- 開頭的 Key</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 7 -->
+    <section class="step" id="step7">
+      <div class="step-hd"><div class="hex">7</div><h3>執行安裝腳本</h3></div>
+      <p class="step-meta">約 10 分鐘，大部分時間在等它跑</p>
+      <p>在 meltan-404-bot 資料夾裡執行：</p>
+      <pre class="cmd"><code>bash setup.sh</code></pre>
+      <p>它會依序問你：</p>
+      <ol>
+        <li><strong>Telegram Bot Token</strong>：貼上金鑰 A。</li>
+        <li><strong>Telegram User ID</strong>：貼上步驟 2 查到的數字，這就是白名單。</li>
+        <li><strong>GitHub PAT</strong>：直接按 Enter（用 gh 的授權）。</li>
+        <li><strong>HuggingFace Token</strong>：貼上金鑰 D，沒有就按 Enter。</li>
+        <li><strong>Tavily API Key</strong>：貼上金鑰 E，沒有就按 Enter。</li>
+        <li><strong>Copilot GitHub Token</strong>：貼上金鑰 C。</li>
+      </ol>
+      <p>之後它會自動完成所有接線：建立 KV 資料庫、部署 Worker 到 Cloudflare、把金鑰分別存進 Cloudflare 和 GitHub 的保險箱（secrets）、向 Telegram 登記 Webhook。最後看到 <strong>Setup Complete!</strong> 和你的 Worker 網址就是成功了，把網址記下來，步驟 9 會用到。</p>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>畫面出現 Setup Complete!</li>
+          <li>記下了 https://meltan-404-relay.xxx.workers.dev 這樣的 Worker 網址</li>
+          <li>Webhook registered successfully 有出現</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 8 -->
+    <section class="step" id="step8">
+      <div class="step-hd"><div class="hex">8</div><h3>測試機器人</h3></div>
+      <p class="step-meta">約 5 分鐘</p>
+      <p>回到 Telegram，打開你在步驟 2 建立的機器人（搜尋它的帳號名），依序測試：</p>
+      <ol>
+        <li>送 <code>/models</code>：應該幾秒內回覆可用的畫圖模型清單。這一層由 Worker 直接處理，能回就代表 Webhook 通了。</li>
+        <li>隨便聊一句，例如「自我介紹一下」：第一次會等 1 到 2 分鐘，因為臨時工要開機、裝環境。這能回就代表 Actions 和 Copilot 都通了。</li>
+        <li>有設 HuggingFace 的話送 <code>/draw 一隻太空貓</code>。</li>
+      </ol>
+      <p>想看幕後過程，打開你 fork 副本的 <strong>Actions</strong> 分頁，每則訊息都是一次 Telegram Chatbot 的執行紀錄，點進去能看到每一步在做什麼。</p>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>/models 有回覆</li>
+          <li>一般聊天有回覆</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- step 9 -->
+    <section class="step" id="step9">
+      <div class="step-hd"><div class="hex">9</div><h3>啟用 Dashboard</h3></div>
+      <p class="step-meta">約 5 分鐘，選用但推薦</p>
+      <p>Dashboard 是統計與對話紀錄的網頁，放在 GitHub Pages（免費的靜態網頁空間）:</p>
+      <ol>
+        <li>到你 fork 副本的 <strong>Settings</strong>，左邊選 <strong>Pages</strong>。</li>
+        <li>Build and deployment 的 Source 選 <strong>GitHub Actions</strong>。</li>
+        <li>到 <strong>Actions</strong> 分頁，左邊選 <strong>Deploy Dashboard</strong>，按右邊的 <strong>Run workflow</strong>。</li>
+        <li>跑完後網站會出現在 <code>https://你的帳號.github.io/meltan-404-bot/</code>。</li>
+        <li>打開網站，點右上角齒輪，填入步驟 7 記下的 <strong>Worker 網址</strong>和你的 <strong>User ID</strong>（私聊時 Chat ID 就是你的 User ID），存檔。</li>
+      </ol>
+      <div class="check">
+        <div class="check-title">完成確認</div>
+        <ul>
+          <li>Dashboard 網址打得開</li>
+          <li>統計卡片有數字，聊天紀錄看得到剛才的測試對話</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ trouble ============ -->
+    <h2 class="part" id="trouble">疑難排解</h2>
+    <p class="part-lede">依「訊息走到哪裡斷掉」來排查，和架構圖的順序一樣。</p>
+
+    <h3>送 /models 沒反應</h3>
+    <p>訊息還沒走到 Worker。依序檢查：</p>
+    <ul>
+      <li>重跑一次 Webhook 登記：瀏覽器打開 <code>你的Worker網址/register?token=你的TELEGRAM_SECRET</code>。TELEGRAM_SECRET 在 setup.sh 執行時自動產生；最簡單的做法是重跑一次 <code>bash setup.sh</code>，它會重新登記。</li>
+      <li>確認你傳訊息的帳號就是白名單上的 User ID。改白名單：編輯 <code>worker/wrangler.toml</code> 的 <code>ALLOWED_USERS</code>（多人用逗號分隔），然後 <code>wrangler deploy --cwd worker</code> 重新部署。</li>
+    </ul>
+
+    <h3>/models 會回，但聊天永遠沒下文</h3>
+    <p>Worker 正常，是臨時工沒上工或倒在半路：</p>
+    <ul>
+      <li>fork 副本的 Actions 分頁是否已啟用（步驟 3 的綠色按鈕）。</li>
+      <li>Actions 分頁完全沒有新的執行紀錄：Worker 的 GitHub 鑰匙沒生效，重跑 <code>bash setup.sh</code>。</li>
+      <li>有執行紀錄但是紅色叉叉：點進去看是哪一步失敗。常見是 Copilot Token 無效或該帳號沒開通 Copilot（金鑰 C 重拿一次），或 Copilot 額度用完。</li>
+    </ul>
+
+    <h3>/draw 回錯誤</h3>
+    <ul>
+      <li>HF Token 沒設或打錯：重跑 <code>bash setup.sh</code> 補上。</li>
+      <li>HuggingFace 免費額度用完：到 HuggingFace 帳號的 billing 頁面確認。</li>
+    </ul>
+
+    <h3>/download 下載 YouTube 失敗</h3>
+    <p>YouTube 會封鎖資料中心的 IP，這是正常的。機器人會自動搜尋 Bilibili、Dailymotion 等替代來源；如果仍然需要直接下載 YouTube，在電腦上執行 <code>bash update-cookies.sh</code>，它會把你瀏覽器的 YouTube cookies 上傳到 GitHub secrets 給臨時工使用。</p>
+
+    <h3>Dashboard 一片空白或讀不到資料</h3>
+    <ul>
+      <li>齒輪設定裡的 Worker 網址要含 <code>https://</code> 開頭、結尾不要斜線。</li>
+      <li>Chat ID 填錯：私聊時就是你的 User ID 數字。</li>
+      <li>先傳幾則訊息給機器人，KV 裡有資料 Dashboard 才有東西可顯示。</li>
+    </ul>
+
+    <!-- ============ safety ============ -->
+    <h2 class="part" id="safety">費用與安全</h2>
+    <p class="part-lede">裝完之後，這兩件事值得知道。</p>
+
+    <h3>錢會花在哪裡</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>項目</th><th>免費額度</th><th>什麼情況要付錢</th></tr></thead>
+        <tbody>
+          <tr><td>Cloudflare Worker+KV</td><td>免費方案每天十萬次請求等級的額度</td><td>個人聊天用量幾乎不可能超過</td></tr>
+          <tr><td>GitHub Actions</td><td>公開 repo 免費</td><td>把 repo 改成私有才會開始算分鐘數</td></tr>
+          <tr><td>GitHub Copilot</td><td>Free 方案每月有限額</td><td>重度使用建議 Pro，每月 10 美元</td></tr>
+          <tr><td>HuggingFace</td><td>每月有免費推論額度</td><td>畫圖量大時按量計費，每張約 0.001 美元</td></tr>
+          <tr><td>Tavily</td><td>每月有免費額度</td><td>研究量大時需付費方案</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>安全注意</h3>
+    <ul>
+      <li><strong>白名單是你的荷包保險</strong>：機器人只回應 <code>ALLOWED_USERS</code> 裡的 User ID。不要設成空的，否則任何找到你機器人的人都能消耗你的 Copilot 額度。</li>
+      <li><strong>金鑰不要進到程式碼裡</strong>:setup.sh 已經把所有金鑰放進 Cloudflare 和 GitHub 的 secrets 保險箱，不會出現在 repo 檔案中。自己改程式時也維持這個原則。</li>
+      <li><strong>token 外流的處理</strong>:Telegram Token 用 BotFather 的 /revoke 重發；GitHub token 到 Settings 撤銷；然後重跑 <code>bash setup.sh</code>。</li>
+    </ul>
+
+    <p style="margin-top:3rem">裝好了嗎？回 Telegram 跟你的機器人說聲嗨。改造它的第一站是 <code>prompt.md</code>，那是機器人的個性與行為說明書，改完 push 上去，下一則訊息就會生效。</p>
+
+  </main>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <span>meltan-404-bot,MIT License</span>
+    <nav class="foot-links" aria-label="推廣連結">
+      <a href="https://github.com/yazelin/meltan-404-bot" rel="noopener">GitHub</a>
+      <a href="https://www.facebook.com/yaze.lin.gm" rel="noopener">Facebook</a>
+      <a href="https://buymeacoffee.com/yazelin" rel="noopener">Buy Me a Coffee</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var btn=document.createElement('button');
+  btn.className='copy';btn.type='button';btn.textContent='複製';
+  btn.addEventListener('click',function(){
+    navigator.clipboard.writeText(pre.querySelector('code').innerText).then(function(){
+      btn.textContent='已複製';
+      setTimeout(function(){btn.textContent='複製';},1500);
+    });
+  });
+  pre.appendChild(btn);
+});
+</script>
+</body>
+</html>

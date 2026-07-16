@@ -40,6 +40,11 @@ if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
 fi
 
 echo ""
+echo "你的 Telegram User ID(數字,向 @userinfobot 查詢)。"
+echo "機器人只回應白名單上的人;多人用逗號分隔。"
+read -rp "👤 Telegram User ID (ALLOWED_USERS): " TG_ALLOWED_USERS
+
+echo ""
 echo "GitHub PAT 需要以下權限："
 echo "  - actions:write (觸發 workflow)"
 echo "  - contents:read"
@@ -122,6 +127,11 @@ else
   echo "✅ KV namespace already configured: $CURRENT_KV_ID"
 fi
 
+if [ -n "$TG_ALLOWED_USERS" ]; then
+  sed -i "s|^ALLOWED_USERS = .*|ALLOWED_USERS = \"$TG_ALLOWED_USERS\"|" worker/wrangler.toml
+  echo "✅ ALLOWED_USERS set to: $TG_ALLOWED_USERS"
+fi
+
 echo ""
 echo "=== [2/5] Installing Worker Dependencies ==="
 
@@ -147,10 +157,14 @@ echo "✅ Worker secrets set"
 echo ""
 echo "=== [4/5] Deploying Worker ==="
 
-wrangler deploy --cwd worker 2>&1 | tail -5
+DEPLOY_OUTPUT=$(wrangler deploy --cwd worker 2>&1)
+echo "$DEPLOY_OUTPUT" | tail -5
 
-# Get Worker URL from wrangler.toml name
-WORKER_URL="https://${WORKER_NAME}.yazelinj303.workers.dev"
+# Get Worker URL from deploy output (each account has its own workers.dev subdomain)
+WORKER_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
+if [ -z "$WORKER_URL" ]; then
+  read -rp "⚠️  Could not detect Worker URL. Enter it manually (https://...workers.dev): " WORKER_URL
+fi
 
 # Verify Worker is responding
 echo ""

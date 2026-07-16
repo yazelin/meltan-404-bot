@@ -2,6 +2,9 @@
 
 Telegram 聊天機器人，基於 GitHub Copilot CLI (gpt-5-mini) 驅動，搭配 HuggingFace 圖片生成、yt-dlp 影片下載、Tavily 網路搜尋等功能。全部運行在 Serverless 架構上（Cloudflare Workers + GitHub Actions），無需自建伺服器。
 
+> **新手安裝指南**：從未用過 GitHub 和 Cloudflare 也能照做的完整教學（架構圖解 + 逐步檢查清單）：
+> <https://yazelin.github.io/meltan-404-bot/guide/>
+
 ## 架構
 
 ```
