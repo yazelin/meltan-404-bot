@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v5
+      - name: Install deps
+        run: pip install -q huggingface_hub pillow
       - name: Generate image
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
