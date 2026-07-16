@@ -1,0 +1,23 @@
+name: Test Draw
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: model key (flux-schnell / flux-dev / sdxl / sd3)
+        required: false
+        default: flux-schnell
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate image
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python3 .github/scripts/generate_image.py "a tiny steel kitten wearing a hex-nut hat, studio light" "${{ inputs.model }}"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: image-${{ inputs.model }}
+          path: /tmp/generated-images/
