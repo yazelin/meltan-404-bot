@@ -4,7 +4,7 @@ Usage: python generate_image.py <prompt> [model_shortname]
 Env: HF_TOKEN
 Available models: flux-schnell (default), flux-dev, sdxl, sd3
 """
-import sys, os, json, urllib.request, urllib.error
+import sys, os, json
 
 MODELS = {
     "flux-schnell": "black-forest-labs/FLUX.1-schnell",
@@ -55,45 +55,15 @@ def main():
 
 
 def generate_with_model(token, model_id, prompt, output_dir):
-    url = f"https://router.huggingface.co/hf-inference/models/{model_id}"
-    payload = json.dumps({"inputs": prompt}).encode("utf-8")
+    # hf-inference 已下架多數生圖模型(HTTP 410),改走 HF router 的
+    # provider 自動路由(fal-ai/together/replicate 等,同一把 token,計 HF credits)
+    from huggingface_hub import InferenceClient
 
-    req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "Accept": "image/png",
-        },
-        method="POST",
-    )
+    client = InferenceClient(provider="auto", api_key=token)
+    image = client.text_to_image(prompt, model=model_id)
 
-    try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            content_type = resp.headers.get("Content-Type", "image/png")
-            image_data = resp.read()
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8", errors="replace")
-        raise Exception(f"HTTP {e.code}: {error_body[:500]}")
-
-    if len(image_data) < 1000:
-        # Likely an error response, not an image
-        try:
-            err = json.loads(image_data)
-            raise Exception(err.get("error", str(err)))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            pass
-
-    ext = "png"
-    if "jpeg" in content_type or "jpg" in content_type:
-        ext = "jpg"
-    elif "webp" in content_type:
-        ext = "webp"
-
-    file_path = os.path.join(output_dir, f"image.{ext}")
-    with open(file_path, "wb") as f:
-        f.write(image_data)
+    file_path = os.path.join(output_dir, "image.png")
+    image.save(file_path)
     return file_path
 
 

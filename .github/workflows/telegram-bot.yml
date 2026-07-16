@@ -30,6 +30,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Install Python deps
+        run: pip install -q huggingface_hub pillow
+
       - name: Route command
         id: route
         env:
