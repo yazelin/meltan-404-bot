@@ -3,7 +3,7 @@ name: Deploy Dashboard
 on:
   push:
     branches: [main]
-    paths: [dashboard/**]
+    paths: [dashboard/**, docs/guide/**]
   workflow_dispatch:
 
 permissions:
@@ -26,9 +26,15 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
+      - name: Assemble site (dashboard at root, guide at /guide/)
+        run: |
+          mkdir -p _site/guide
+          cp -r dashboard/. _site/
+          cp -r docs/guide/. _site/guide/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dashboard
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
